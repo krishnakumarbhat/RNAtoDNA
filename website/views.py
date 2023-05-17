@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request, flash, jsonify
+
+from flask import Blueprint, render_template, request, flash
 from flask_login import login_required, current_user
-from .models import Note
-from . import db
-import json
+from werkzeug.utils import secure_filename
+import os
 
 views = Blueprint('views', __name__)
 
@@ -16,7 +16,7 @@ def home():
             return render_template("home.html", user=current_user)
 
         file = request.files['file']
-        
+
         # if user does not select file, browser also
         # submit an empty part without filename
         if file.filename == '':
@@ -28,35 +28,44 @@ def home():
             flash('Invalid file format. Only PDB files are allowed.', category='error')
             return render_template("home.html", user=current_user)
 
-        # Save file to server
-        file.save(file.filename)
+        # Generate a unique filename and save the file to the server
+        filename = secure_filename(file.filename)
+        new_file_name = 'converted_' + filename
+        file.save(new_file_name)
 
-        # Read file contents
-        with open(file.filename, 'r') as f:
+        # Perform RNA to DNA conversion and remove O2 lines
+        with open(new_file_name, 'r') as f:
             file_contents = f.readlines()
 
-        # Perform RNA to DNA conversion and create new PDB file
         new_file_contents = ''
         for line in file_contents:
             if line.startswith('ATOM'):
                 residue_name = line[17:20].strip()
                 if residue_name == 'A':
-                    line = line[:77] + 'C' + line[78:80] + ' ' + line[81:87] + ' ' + line[88:]
+                    line = line[:17] + ' DA ' + line[21:]
                 elif residue_name == 'C':
-                    line = line[:77] + 'G' + line[78:80] + ' ' + line[81:87] + ' ' + line[88:]
+                    line = line[:17] + ' DC ' + line[21:]
                 elif residue_name == 'G':
-                    line = line[:77] + 'C' + line[78:80] + ' ' + line[81:87] + ' ' + line[88:]
+                    line = line[:17] + ' DG ' + line[21:]
                 elif residue_name == 'U':
-                    line = line[:77] + 'T' + line[78:80] + ' ' + line[81:87] + ' ' + line[88:]
-            if line.endswith(' O  \n'):
-                line = line[:77] + '  \n'
+                    line = line[:17] + ' DT ' + line[21:]
+
+            # Remove O2 lines
+            if line[13:16].strip() == 'O2':
+                continue
+
+            # Replace H5 with C7
+            if line[13:16].strip() == 'H5':
+                line = line[:13] + 'C7' + line[16:]
+
             new_file_contents += line
 
-        # Save new file to server
-        with open(file.filename.split('.')[0] + '_dna.pdb', 'w') as f:
-            f.write(new_file_contents)
+        # Save the converted DNA file
+        with open(new_file_name, 'w') as f:
+            f.writelines(new_file_contents)
 
-        flash('File converted successfully!', category='success')
-        return render_template("home.html", user=current_user)
+        # Return download link to the user
+        return render_template("home.html", user=current_user, download_link=new_file_name)
 
     return render_template("home.html", user=current_user)
+

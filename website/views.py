@@ -1,4 +1,3 @@
-
 from flask import Blueprint, render_template, request, flash
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -50,13 +49,13 @@ def home():
                 elif residue_name == 'U':
                     line = line[:17] + ' DT ' + line[21:]
 
-            # Remove O2 lines
-            if line[13:16].strip() == "O2'":
-                continue
+            # Remove O2' lines
+                if line[13:16].strip() == "O2'":
+                    continue
 
             # Replace H5 with C7
-            if line[13:16].strip() == 'H5':
-                line = line[:13] + 'C7' + line[16:]
+                if line[13:16].strip() == 'H5':
+                    line = line[:13] + 'C7' + line[16:]
 
             new_file_contents += line
 
@@ -68,4 +67,3 @@ def home():
         return render_template("home.html", user=current_user, download_link=new_file_name)
 
     return render_template("home.html", user=current_user)
-

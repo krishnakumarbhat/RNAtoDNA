@@ -51,7 +51,7 @@ def home():
                     line = line[:17] + ' DT ' + line[21:]
 
             # Remove O2 lines
-            if line[13:16].strip() == 'O2':
+            if line[13:16].strip() == "O2'":
                 continue
 
             # Replace H5 with C7

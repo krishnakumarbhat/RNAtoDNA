@@ -55,7 +55,7 @@ def home():
 
             # Replace H5 with C7
                 if line[13:16].strip() == 'H5':
-                    line = line[:13] + 'C7' + line[16:]
+                    line = line[:13] + 'C7 ' + line[16:]
 
             new_file_contents += line
 

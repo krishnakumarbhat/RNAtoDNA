@@ -29,7 +29,7 @@ def home():
 
         # Generate a unique filename and save the file to the server
         filename = secure_filename(file.filename)
-        new_file_name = 'converted_' + filename
+        new_file_name = 'converted_DNA_from' + filename
         file.save(new_file_name)
 
         # Perform RNA to DNA conversion and remove O2 lines

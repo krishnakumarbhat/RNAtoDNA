@@ -1,37 +1,102 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}RNA to DNA Converter{% endblock %}
 
 {% block content %}
-<h1 align="center">Notes</h1>
+<div class="converter-card">
+  <h1><i class="bi bi-bezier2"></i> RNA to DNA</h1>
+  <p class="subtitle">Convert your PDB files from RNA to DNA format instantly</p>
 
+  <form method="POST" enctype="multipart/form-data" id="upload-form">
+    <div class="upload-area" id="upload-area">
+      <input type="file" id="file-input" name="file" accept=".pdb">
+      <i class="bi bi-cloud-arrow-up"></i>
+      <h3>Drop your PDB file here</h3>
+      <p>or click to browse</p>
+      <div class="file-name" id="file-name" style="display: none;"></div>
+    </div>
 
-{% if message %}
-<div class="alert alert-{{ message.category }}">
-  {{ message.message }}
-</div>
-{% endif %}
-
-<ul class="list-group list-group-flush" id="notes">
-  {% for note in user.notes %}
-  <li class="list-group-item">
-    {{ note.data }}
-    <button type="button" class="close" onClick="deleteNote({{ note.id }})">
-      <span aria-hidden="true">&times;</span>
+    <button type="submit" class="btn-convert" id="convert-btn" disabled>
+      <i class="bi bi-arrow-repeat"></i>
+      Convert to DNA
     </button>
-  </li>
-  {% endfor %}
-</ul>
+  </form>
 
-<form method="POST" enctype="multipart/form-data">
-  <div class="form-group">
-    <label for="file">Upload a .pdb file:</label>
-    <input type="file" class="form-control-file" id="file" name="file">
-  </div>
-  <br>
-  <div align="center">
-    <button type="submit" class="btn btn-primary">Convert and Download</button>
-  </div>
-</form>
+  {% if download_ready %}
+  <a href="{{ url_for('views.download_file', filename=download_filename) }}" class="btn-download">
+    <i class="bi bi-download"></i>
+    Download Converted File
+  </a>
+  {% endif %}
 
+  <div class="features">
+    <div class="feature">
+      <i class="bi bi-lightning-charge"></i>
+      <h4>Fast</h4>
+      <p>Instant conversion</p>
+    </div>
+    <div class="feature">
+      <i class="bi bi-shield-check"></i>
+      <h4>Secure</h4>
+      <p>Files auto-deleted</p>
+    </div>
+    <div class="feature">
+      <i class="bi bi-file-earmark-code"></i>
+      <h4>Accurate</h4>
+      <p>Proper residue mapping</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+  const uploadArea = document.getElementById('upload-area');
+  const fileInput = document.getElementById('file-input');
+  const fileName = document.getElementById('file-name');
+  const convertBtn = document.getElementById('convert-btn');
+
+  // Click to upload
+  uploadArea.addEventListener('click', () => fileInput.click());
+
+  // File selected
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      const file = e.target.files[0];
+      fileName.textContent = file.name;
+      fileName.style.display = 'inline-block';
+      convertBtn.disabled = false;
+      uploadArea.classList.add('dragover');
+    }
+  });
+
+  // Drag and drop
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+  });
+
+  uploadArea.addEventListener('dragleave', () => {
+    if (!fileInput.files.length) {
+      uploadArea.classList.remove('dragover');
+    }
+  });
+
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      fileInput.files = files;
+      fileName.textContent = files[0].name;
+      fileName.style.display = 'inline-block';
+      convertBtn.disabled = false;
+    }
+  });
+
+  // Form submit - show loading state
+  document.getElementById('upload-form').addEventListener('submit', () => {
+    convertBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Converting...';
+    convertBtn.disabled = true;
+  });
+</script>
 {% endblock %}

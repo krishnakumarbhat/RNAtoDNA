@@ -1,3 +1,4 @@
-flask
-Flask-SQLAlchemy
-flask-login
+Flask==2.2.5
+Flask-SQLAlchemy==3.0.3
+Flask-Login==0.6.2
+Werkzeug>=2.0.0

@@ -16,16 +16,51 @@
       <div class="file-name" id="file-name" style="display: none;"></div>
     </div>
 
+    <div class="row g-2 mb-3">
+      <div class="col-12 col-md-6">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="remove_o2prime" name="remove_o2prime" {% if options and options.remove_o2prime %}checked{% else %}checked{% endif %}>
+          <label class="form-check-label" for="remove_o2prime">Remove O2' atoms</label>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="h5_to_c7" name="h5_to_c7" {% if options and options.h5_to_c7 %}checked{% else %}checked{% endif %}>
+          <label class="form-check-label" for="h5_to_c7">Rename H5 → C7</label>
+        </div>
+      </div>
+      <div class="col-12">
+        <small style="color: rgba(255,255,255,0.6);">Tip: these options match common RNA→DNA cleanup conventions.</small>
+      </div>
+    </div>
+
     <button type="submit" class="btn-convert" id="convert-btn" disabled>
       <i class="bi bi-arrow-repeat"></i>
       Convert to DNA
     </button>
   </form>
 
+  {% if stats %}
+  <div class="mt-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem;">
+    <div class="d-flex align-items-center justify-content-between" style="gap: 1rem; flex-wrap: wrap;">
+      <div>
+        <div style="font-weight: 600;">Conversion summary</div>
+        <div style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">
+          Lines: {{ stats.lines_in }} → {{ stats.lines_out }} · Atoms converted: {{ stats.atoms_converted }} · O2' removed: {{ stats.o2prime_removed }} · H5 renamed: {{ stats.h5_renamed }}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% if download_ready %}
   <a href="{{ url_for('views.download_file', filename=download_filename) }}" class="btn-download">
     <i class="bi bi-download"></i>
     Download Converted File
+  </a>
+  <a href="{{ url_for('views.preview_file', filename=download_filename) }}" class="btn btn-outline-light w-100 mt-2" style="border-radius: 12px;">
+    <i class="bi bi-eye"></i>
+    Preview (first 200 lines)
   </a>
   {% endif %}
 
@@ -37,13 +72,13 @@
     </div>
     <div class="feature">
       <i class="bi bi-shield-check"></i>
-      <h4>Secure</h4>
-      <p>Files auto-deleted</p>
+      <h4>Safer</h4>
+      <p>Sanitized uploads</p>
     </div>
     <div class="feature">
       <i class="bi bi-file-earmark-code"></i>
-      <h4>Accurate</h4>
-      <p>Proper residue mapping</p>
+      <h4>Research-ready</h4>
+      <p>Clean residue mapping</p>
     </div>
   </div>
 </div>
